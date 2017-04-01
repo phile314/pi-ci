@@ -1,15 +1,21 @@
 # nixpkgs-ci.nix
 
-{ supportedSystems ? ["x86_64-linux"] }:
+{ supportedSystems ? ["x86_64-linux"], supportedCompilers ? ["ghc784" "ghc7103" "ghc801"] }:
 
 with (import <nixpkgs/pkgs/top-level/release-lib.nix> { inherit supportedSystems; });
 
 let
-  jobs = rec {
-    agda = pkgs.haskellPackages.callPackage <agdaSrc/default.nix> {
-      sphinx = pkgs.python34Packages.sphinx;
-      sphinx_rtd_theme = pkgs.python34Packages.sphinx_rtd_theme;
-      texLive = pkgs.texlive.combined.scheme-full;
+  genAttrs = pkgs.lib.genAttrs;
+
+  genAgdaJobs = system: compiler:
+    let
+      pkgs = import <nixpkgs> { inherit system; };
+      haskellPackages = pkgs.lib.getAttrFromPath ["haskell" "packages" compiler] pkgs;
+    in rec {
+      Agda = haskellPackages.callPackage <agdaSrc/default.nix> {};
     };
-  };
-in jobs
+
+in
+  genAttrs supportedCompilers (compiler:
+    genAttrs supportedSystems (system:
+      genAgdaJobs system compiler))
