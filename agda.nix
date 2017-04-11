@@ -11,8 +11,10 @@ let
     let
       pkgs = import <nixpkgs> { inherit system; };
       haskellPackages = pkgs.lib.getAttrFromPath ["haskell" "packages" compiler] pkgs;
+      agda = haskellPackages.callPackage <agdaSrc/default.nix> {};
     in rec {
-      Agda = haskellPackages.callPackage <agdaSrc/default.nix> {};
+      Agda = agda.Agda;
+      Agda-haddock = agda.Agda-haddock;
     };
 
 in
