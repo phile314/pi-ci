@@ -13,8 +13,12 @@ let
       haskellPackages = pkgs.lib.getAttrFromPath ["haskell" "packages" compiler] pkgs;
       agda = haskellPackages.callPackage <agdaSrc/default.nix> {};
     in rec {
+      # TODO why do we have to list all the jobs explicitly?
       Agda = agda.Agda;
-      Agda-haddock = agda.Agda-haddock;
+      haddock = agda.haddock;
+      tests = {
+        api = agda.tests.api;
+      };
     };
 
 in
